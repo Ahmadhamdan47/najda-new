@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Oct 03, 2024 at 12:54 PM
+-- Generation Time: Oct 25, 2024 at 11:18 AM
 -- Server version: 10.4.27-MariaDB
 -- PHP Version: 7.4.33
 
@@ -176,7 +176,9 @@ INSERT INTO `houses` (`id`, `house_label`, `total_people`, `under_two_years`, `u
 CREATE TABLE `individuals` (
   `id` int(11) NOT NULL,
   `name` varchar(255) NOT NULL,
-  `type` enum('house_contact','family_head') NOT NULL
+  `type` enum('house_contact','family_head') NOT NULL,
+  `house_id` int(11) DEFAULT NULL,
+  `family_id` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -193,33 +195,38 @@ CREATE TABLE `needs` (
   `medicine` tinyint(1) DEFAULT NULL,
   `furniture` tinyint(1) DEFAULT NULL,
   `clothes` tinyint(1) DEFAULT NULL,
-  `cleaning_supplies` tinyint(1) DEFAULT NULL
+  `cleaning_supplies` tinyint(1) DEFAULT NULL,
+  `fulfilled` tinyint(1) DEFAULT 0,
+  `house_id` int(11) DEFAULT NULL,
+  `fulfilled_date` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `needs`
 --
 
-INSERT INTO `needs` (`id`, `individual_id`, `family_id`, `food_aid`, `medicine`, `furniture`, `clothes`, `cleaning_supplies`) VALUES
-(1, NULL, NULL, 0, 0, 0, 0, 0),
-(2, NULL, NULL, 0, 0, 0, 0, 0),
-(3, NULL, NULL, 0, 0, 0, 0, 0),
-(4, NULL, NULL, 0, 0, 0, 0, 0),
-(5, NULL, NULL, 0, 0, 0, 0, 0),
-(6, NULL, NULL, 0, 0, 0, 0, 0),
-(7, NULL, NULL, 0, 0, 0, 0, 0),
-(8, NULL, NULL, 0, 0, 0, 0, 0),
-(9, NULL, NULL, 0, 0, 0, 0, 0),
-(10, NULL, NULL, 0, 0, 0, 0, 0),
-(11, NULL, NULL, 0, 0, 0, 0, 0),
-(12, NULL, NULL, 0, 0, 0, 0, 0),
-(13, NULL, NULL, 0, 0, 0, 0, 0),
-(14, NULL, NULL, 0, 0, 0, 0, 0),
-(15, NULL, NULL, 0, 0, 0, 0, 0),
-(16, NULL, NULL, 0, 0, 0, 0, 0),
-(17, NULL, NULL, 0, 0, 0, 0, 0),
-(18, NULL, NULL, 0, 0, 0, 0, 0),
-(19, NULL, NULL, 0, 0, 0, 0, 0);
+INSERT INTO `needs` (`id`, `individual_id`, `family_id`, `food_aid`, `medicine`, `furniture`, `clothes`, `cleaning_supplies`, `fulfilled`, `house_id`, `fulfilled_date`) VALUES
+(1, NULL, NULL, 0, 0, 0, 0, 0, 0, NULL, NULL),
+(2, NULL, NULL, 0, 0, 0, 0, 0, 0, NULL, NULL),
+(3, NULL, NULL, 0, 0, 0, 0, 0, 0, NULL, NULL),
+(4, NULL, NULL, 0, 0, 0, 0, 0, 0, NULL, NULL),
+(5, NULL, NULL, 0, 0, 0, 0, 0, 0, NULL, NULL),
+(6, NULL, NULL, 0, 0, 0, 0, 0, 0, NULL, NULL),
+(7, NULL, NULL, 0, 0, 0, 0, 0, 0, NULL, NULL),
+(8, NULL, NULL, 0, 0, 0, 0, 0, 0, NULL, NULL),
+(9, NULL, NULL, 0, 0, 0, 0, 0, 0, NULL, NULL),
+(10, NULL, NULL, 0, 0, 0, 0, 0, 0, NULL, NULL),
+(11, NULL, NULL, 0, 0, 0, 0, 0, 0, NULL, NULL),
+(12, NULL, NULL, 0, 0, 0, 0, 0, 0, NULL, NULL),
+(13, NULL, NULL, 0, 0, 0, 0, 0, 0, NULL, NULL),
+(14, NULL, NULL, 0, 0, 0, 0, 0, 0, NULL, NULL),
+(15, NULL, NULL, 0, 0, 0, 0, 0, 0, NULL, NULL),
+(16, NULL, NULL, 0, 0, 0, 0, 0, 0, NULL, NULL),
+(17, NULL, NULL, 0, 0, 0, 0, 0, 0, NULL, NULL),
+(18, NULL, NULL, 0, 0, 0, 0, 0, 0, NULL, NULL),
+(19, NULL, NULL, 0, 0, 0, 0, 0, 0, NULL, NULL),
+(21, NULL, NULL, 1, 0, 0, 0, 0, 1, 1, NULL),
+(22, NULL, NULL, 1, 0, 0, 0, 0, 1, 1, '2024-10-25 09:09:29');
 
 --
 -- Indexes for dumped tables
@@ -242,7 +249,9 @@ ALTER TABLE `houses`
 -- Indexes for table `individuals`
 --
 ALTER TABLE `individuals`
-  ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `fk_individual_house` (`house_id`),
+  ADD KEY `fk_individual_family` (`family_id`);
 
 --
 -- Indexes for table `needs`
@@ -278,7 +287,7 @@ ALTER TABLE `individuals`
 -- AUTO_INCREMENT for table `needs`
 --
 ALTER TABLE `needs`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
 
 --
 -- Constraints for dumped tables
@@ -289,6 +298,13 @@ ALTER TABLE `needs`
 --
 ALTER TABLE `families`
   ADD CONSTRAINT `families_ibfk_1` FOREIGN KEY (`house_id`) REFERENCES `houses` (`id`);
+
+--
+-- Constraints for table `individuals`
+--
+ALTER TABLE `individuals`
+  ADD CONSTRAINT `fk_individual_family` FOREIGN KEY (`family_id`) REFERENCES `families` (`id`) ON DELETE SET NULL,
+  ADD CONSTRAINT `fk_individual_house` FOREIGN KEY (`house_id`) REFERENCES `houses` (`id`) ON DELETE SET NULL;
 
 --
 -- Constraints for table `needs`
