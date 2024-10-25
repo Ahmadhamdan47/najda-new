@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import * as XLSX from 'xlsx'; // Import the xlsx library
 import './Persons.css'; // Reuse the same CSS for consistency
 
 const Houses = () => {
@@ -26,12 +27,10 @@ const Houses = () => {
   const fetchHouses = () => {
     axios.get('http://localhost:5000/houses')
       .then(response => {
-        console.log('Fetched houses:', response.data); // Add this line to check the data
         setHouses(response.data);
       })
-      .catch(error => console.error(error));
+      .catch(error => console.error('Error fetching houses:', error));
   };
-  
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -79,11 +78,36 @@ const Houses = () => {
       .catch(error => console.error('Error deleting house:', error));
   };
 
+  const generateReport = () => {
+    // Define Arabic column headers for the Excel report
+    const worksheetData = [
+      ['رقم المنزل', 'الشخص الذي تم الاتصال به', 'عدد الأشخاص', 'أقل من سنتين', 'أقل من 13 سنة', 'أكبر من 13 سنة', 'مكان الإقامة الحالي', 'مكان النزوح', 'منزل مفروش', 'غاز'],
+      ...houses.map(house => [
+        house.house_number || 'N/A',
+        house.person_contacted || 'N/A',
+        house.total_people || '0',
+        house.under_two_years || '0',
+        house.under_thirteen_years || '0',
+        house.over_thirteen_years || '0',
+        house.current_residence || 'N/A',
+        house.displacement_location || 'N/A',
+        house.furnished_home ? 'نعم' : 'لا',
+        house.gas ? 'نعم' : 'لا',
+      ]),
+    ];
+
+    // Create a new workbook and add the worksheet
+    const workbook = XLSX.utils.book_new();
+    const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'تقرير البيوت');
+
+    // Save the workbook to a file
+    XLSX.writeFile(workbook, 'تقرير_البيوت.xlsx');
+  };
+
   const filteredHouses = houses.filter(house =>
     house.house_number ? house.house_number.toLowerCase().includes(searchQuery.toLowerCase()) : true
   );
-  
-
 
   return (
     <div className="persons-container" style={{ direction: 'rtl' }}>
@@ -188,6 +212,11 @@ const Houses = () => {
         </button>
       </form>
 
+      {/* Generate Report Button */}
+      <button onClick={generateReport} className="form-button generate-report">
+        تحميل تقرير البيوت
+      </button>
+
       {/* Houses table */}
       <h2>قائمة البيوت</h2>
       <table className="persons-table">
@@ -207,29 +236,28 @@ const Houses = () => {
           </tr>
         </thead>
         <tbody>
-  {filteredHouses.map(house => (
-    <tr key={house.id}>
-      <td>{house.id || 'N/A'}</td>
-      <td>{house.house_label || 'N/A'}</td>
-      <td>{house.total_people || '0'}</td>
-      <td>{house.under_two_years || '0'}</td>
-      <td>{house.under_thirteen_years || '0'}</td>
-      <td>{house.over_thirteen_years || '0'}</td>
-      <td>{house.current_residence || 'N/A'}</td>
-      <td>{house.displacement_location || 'N/A'}</td>
-      <td>{house.furnished_home ? 'نعم' : 'لا'}</td>
-      <td>{house.gas ? 'نعم' : 'لا'}</td>
-      <td>
-        <button onClick={() => handleEditHouse(house)}>تعديل</button>
-        <button onClick={() => handleDeleteHouse(house.id)}>حذف</button>
-        {isEditing === house.id && (
-          <button onClick={() => handleSaveHouse(house.id)}>حفظ</button>
-        )}
-      </td>
-    </tr>
-  ))}
-</tbody>
-
+          {filteredHouses.map(house => (
+            <tr key={house.id}>
+              <td>{house.house_number || 'N/A'}</td>
+              <td>{house.person_contacted || 'N/A'}</td>
+              <td>{house.total_people || '0'}</td>
+              <td>{house.under_two_years || '0'}</td>
+              <td>{house.under_thirteen_years || '0'}</td>
+              <td>{house.over_thirteen_years || '0'}</td>
+              <td>{house.current_residence || 'N/A'}</td>
+              <td>{house.displacement_location || 'N/A'}</td>
+              <td>{house.furnished_home ? 'نعم' : 'لا'}</td>
+              <td>{house.gas ? 'نعم' : 'لا'}</td>
+              <td>
+                <button onClick={() => handleEditHouse(house)}>تعديل</button>
+                <button onClick={() => handleDeleteHouse(house.id)}>حذف</button>
+                {isEditing === house.id && (
+                  <button onClick={() => handleSaveHouse(house.id)}>حفظ</button>
+                )}
+              </td>
+            </tr>
+          ))}
+        </tbody>
       </table>
     </div>
   );

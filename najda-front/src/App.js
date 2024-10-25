@@ -4,7 +4,9 @@ import Houses from './Houses';
 import Families from './Families';
 import Individuals from './Individuals';
 import Needs from './Needs';
+import FulfilledNeeds from './FullFilledNeeds';
 import './App.css'; // Importing the enhanced CSS file for styling
+
 
 const App = () => {
   return (
@@ -17,6 +19,9 @@ const App = () => {
             <li className="nav-item"><Link to="/families">العائلات</Link></li>
             <li className="nav-item"><Link to="/individuals">الأفراد</Link></li>
             <li className="nav-item"><Link to="/needs">الاحتياجات</Link></li>
+            <li className="nav-item"><Link to="/fulfilled-needs">مساعدات</Link></li>
+          
+
           </ul>
         </nav>
 
@@ -27,7 +32,8 @@ const App = () => {
             <Route path="/families" element={<Families />} />
             <Route path="/individuals" element={<Individuals />} />
             <Route path="/needs" element={<Needs />} />
-            
+            <Route path="/fulfilled-needs" element={<FulfilledNeeds />} /> 
+
             {/* Default Route */}
             <Route path="/" element={
               <div className="welcome">
